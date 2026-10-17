@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Churn Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+    <h1>Customer Churn Predictor</h1>
+    <p class="subtitle">Enter the customer details below to find out whether the customer is likely to leave the company.</p>
+
+    {% if errors %}
+    <div class="error-box">
+        <strong>Please fix the following:</strong>
+        <ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul>
+    </div>
+    {% endif %}
+
+    {% if result %}
+    <div class="result {{ 'churn' if result.churn else 'no-churn' }}">
+        {% if result.churn %}
+            <h2>Prediction: Churn</h2>
+            <p>This customer is likely to leave. Estimated churn probability: <strong>{{ result.percent }}%</strong></p>
+        {% else %}
+            <h2>Prediction: No Churn</h2>
+            <p>This customer is likely to stay. Estimated churn probability: <strong>{{ result.percent }}%</strong></p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('predict') }}">
+        <h3>Customer Information</h3>
+        <div class="grid">
+            <div class="field">
+                <label for="gender">Gender</label>
+                <select name="gender" id="gender" required>
+                    <option value="">-- Select --</option>
+                    {% for o in choices['gender'] %}<option value="{{ o }}" {{ 'selected' if form.get('gender') == o }}>{{ o }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label for="SeniorCitizen">Senior Citizen</label>
+                <select name="SeniorCitizen" id="SeniorCitizen" required>
+                    <option value="">-- Select --</option>
+                    <option value="0" {{ 'selected' if form.get('SeniorCitizen') == '0' }}>No</option>
+                    <option value="1" {{ 'selected' if form.get('SeniorCitizen') == '1' }}>Yes</option>
+                </select>
+            </div>
+            <div class="field">
+                <label for="Partner">Has Partner</label>
+                <select name="Partner" id="Partner" required>
+                    <option value="">-- Select --</option>
+                    {% for o in choices['Partner'] %}<option value="{{ o }}" {{ 'selected' if form.get('Partner') == o }}>{{ o }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label for="Dependents">Has Dependents</label>
+                <select name="Dependents" id="Dependents" required>
+                    <option value="">-- Select --</option>
+                    {% for o in choices['Dependents'] %}<option value="{{ o }}" {{ 'selected' if form.get('Dependents') == o }}>{{ o }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label for="tenure">Tenure (months with company)</label>
+                <input type="number" step="1" min="0" max="100" name="tenure" id="tenure" value="{{ form.get('tenure', '') }}" placeholder="e.g. 12" required>
+            </div>
+        </div>
+
+        <h3>Services</h3>
+        <div class="grid">
+            {% for name, label in [('PhoneService','Phone Service'),('MultipleLines','Multiple Lines'),('OnlineSecurity','Online Security'),('OnlineBackup','Online Backup'),('DeviceProtection','Device Protection'),('TechSupport','Tech Support'),('StreamingTV','Streaming TV'),('StreamingMovies','Streaming Movies')] %}
+            <div class="field">
+                <label for="{{ name }}">{{ label }}</label>
+                <select name="{{ name }}" id="{{ name }}" required>
+                    <option value="">-- Select --</option>
+                    {% for o in choices[name] %}<option value="{{ o }}" {{ 'selected' if form.get(name) == o }}>{{ o }}</option>{% endfor %}
+                </select>
+            </div>
+            {% endfor %}
+            <div class="field">
+                <label for="InternetService">Internet Service</label>
+                <select name="InternetService" id="InternetService" required>
+                    <option value="">-- Select --</option>
+                    {% for o in choices['InternetService'] %}<option value="{{ o }}" {{ 'selected' if form.get('InternetService') == o }}>{{ o }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <h3>Contract and Billing</h3>
+        <div class="grid">
+            <div class="field">
+                <label for="Contract">Contract Type</label>
+                <select name="Contract" id="Contract" required>
+                    <option value="">-- Select --</option>
+                    {% for o in choices['Contract'] %}<option value="{{ o }}" {{ 'selected' if form.get('Contract') == o }}>{{ o }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label for="PaperlessBilling">Paperless Billing</label>
+                <select name="PaperlessBilling" id="PaperlessBilling" required>
+                    <option value="">-- Select --</option>
+                    {% for o in choices['PaperlessBilling'] %}<option value="{{ o }}" {{ 'selected' if form.get('PaperlessBilling') == o }}>{{ o }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label for="PaymentMethod">Payment Method</label>
+                <select name="PaymentMethod" id="PaymentMethod" required>
+                    <option value="">-- Select --</option>
+                    {% for o in choices['PaymentMethod'] %}<option value="{{ o }}" {{ 'selected' if form.get('PaymentMethod') == o }}>{{ o }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label for="MonthlyCharges">Monthly Charges</label>
+                <input type="number" step="0.01" min="0" max="500" name="MonthlyCharges" id="MonthlyCharges" value="{{ form.get('MonthlyCharges', '') }}" placeholder="e.g. 70.50" required>
+            </div>
+            <div class="field">
+                <label for="TotalCharges">Total Charges</label>
+                <input type="number" step="0.01" min="0" max="20000" name="TotalCharges" id="TotalCharges" value="{{ form.get('TotalCharges', '') }}" placeholder="e.g. 850.00" required>
+            </div>
+        </div>
+
+        <button type="submit">Predict Churn</button>
+    </form>
+</div>
+</body>
+</html>
